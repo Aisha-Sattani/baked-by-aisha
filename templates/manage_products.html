@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Manage Products</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link rel="stylesheet" href="/static/css/style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1 class="text-center my-5">Manage Products</h1>
+      <div id="manage-products"></div>
+    </div>
+
+    <!-- {% raw %} -->
+<script type="text/babel">
+    const ManageProducts = () => {
+      const [products, setProducts] = React.useState([]);
+      const [form, setForm] = React.useState({
+        name: "",
+        price: "",
+        images: "",
+        category: "",
+        size: "",
+      });
+  
+      React.useEffect(() => {
+        fetch("/api/products")
+          .then((response) => response.json())
+          .then((data) => setProducts(data))
+          .catch((error) => console.error("Error fetching products:", error));
+      }, []);
+  
+      const handleInputChange = (e) => {
+        setForm({ ...form, [e.target.name]: e.target.value });
+      };
+  
+      const addProduct = () => {
+        fetch("/api/products", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(form),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            setProducts([...products, { ...form, _id: data._id }]);
+            setForm({ name: "", price: "", images: "", category: "", size: "" });
+          })
+          .catch((error) => console.error("Error adding product:", error));
+      };
+  
+      const deleteProduct = (id) => {
+        fetch(`/api/products/${id}`, { method: "DELETE" })
+          .then(() => setProducts(products.filter((product) => product._id !== id)))
+          .catch((error) => console.error("Error deleting product:", error));
+      };
+  
+      return (
+        <div>
+          <h2>Add Product</h2>
+          <input
+            type="text"
+            name="name"
+            placeholder="Name"
+            value={form.name}
+            onChange={handleInputChange}
+          />
+          <input
+            type="text"
+            name="price"
+            placeholder="Price"
+            value={form.price}
+            onChange={handleInputChange}
+          />
+          <input
+            type="text"
+            name="images"
+            placeholder="Image Filename"
+            value={form.images}
+            onChange={handleInputChange}
+          />
+          <input
+            type="text"
+            name="category"
+            placeholder="Category"
+            value={form.category}
+            onChange={handleInputChange}
+          />
+          <input
+            type="text"
+            name="size"
+            placeholder="Size"
+            value={form.size}
+            onChange={handleInputChange}
+          />
+          <button onClick={addProduct}>Add Product</button>
+          <h2>Product List</h2>
+          {products.map((product) => (
+            <div key={product._id}>
+              <h3>{product.name}</h3>
+              <p>{product.price}</p>
+              <img
+                src={`/static/img/${product.images}.jpg`}
+                alt={product.name}
+                style={{ maxWidth: "100px" }}
+              />
+              <button onClick={() => deleteProduct(product._id)}>Delete</button>
+            </div>
+          ))}
+        </div>
+      );
+    };
+  
+    ReactDOM.createRoot(document.getElementById("manage-products")).render(<ManageProducts />);
+  </script>
+  <!-- {% endraw %} -->
+  
+  </body>
+</html>
