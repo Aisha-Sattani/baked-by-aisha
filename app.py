@@ -1,4 +1,5 @@
 from flask import Flask, jsonify, render_template
+from asgiref.wsgi import WsgiToAsgi
 from pymongo import MongoClient
 from dotenv import load_dotenv
 import os
@@ -31,6 +32,8 @@ def product():
 def get_products():
     products = list(products_collection.find({}, {"_id": 0}))  # Exclude MongoDB's ObjectId
     return jsonify(products)
+
+asgi_app = WsgiToAsgi(app)
 
 if __name__ == "__main__":
     app.run(debug=True)
