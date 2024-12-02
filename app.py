@@ -27,6 +27,14 @@ def home():
 def product():
     return render_template("product.html")
 
+@app.route("/about")
+def about():
+    return render_template("about.html")
+
+@app.route("/contact")
+def contact():
+    return render_template("contact.html")
+
 # API to get products from MongoDB
 @app.route("/api/products")
 def get_products():
