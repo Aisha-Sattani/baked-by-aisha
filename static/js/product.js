@@ -1,5 +1,6 @@
 const Product = () => {
   const [products, setProducts] = React.useState([]);
+  const [modalProduct, setModalProduct] = React.useState(null); // Product details for the modal
 
   React.useEffect(() => {
     // Fetch products from the backend API
@@ -9,6 +10,14 @@ const Product = () => {
       .catch((error) => console.error("Error fetching products:", error));
   }, []);
 
+  const openModal = (product) => {
+    setModalProduct(product);
+  };
+
+  const closeModal = () => {
+    setModalProduct(null);
+  };
+
   return (
     <div className="container-xxl bg-light my-6 py-6 pt-0">
       <div className="container">
@@ -17,7 +26,6 @@ const Product = () => {
           <h1 className="display-6 mb-4">Explore The Categories Of Our Bakery Products</h1>
         </div>
         <div className="row g-4">
-          {/* Render Product Cards from the database */}
           {products.map((product) => (
             <div className="col-lg-4 col-md-6" key={product._id}>
               <div className="product-item d-flex flex-column bg-white rounded overflow-hidden h-100">
@@ -31,19 +39,67 @@ const Product = () => {
                 <div className="position-relative mt-auto">
                   <img
                     className="img-fluid"
-                    src={`/static/img/${product.images}.jpg`} // Adjust path based on your static folder setup
+                    src={`/static/img/${product.images.split(",")[0]}`} // Use the first image for the product card
                     alt={product.name}
                   />
                   <div className="product-overlay">
-                    <a className="btn btn-lg-square btn-outline-light rounded-circle" href="#">
+                    <button
+                      className="btn btn-lg-square btn-outline-light rounded-circle"
+                      onClick={() => openModal(product)}
+                    >
                       <i className="fa fa-eye text-primary"></i>
-                    </a>
+                    </button>
                   </div>
                 </div>
               </div>
             </div>
           ))}
         </div>
+
+        {modalProduct && (
+          <div
+            className="modal d-flex align-items-center justify-content-center"
+            style={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              width: "100%",
+              height: "100%",
+              backgroundColor: "rgba(0, 0, 0, 0.8)",
+              zIndex: 1050,
+            }}
+          >
+            <div
+              className="modal-content bg-white p-4"
+              style={{
+                width: "90%",
+                maxWidth: "800px",
+                maxHeight: "90%",
+                overflowY: "auto",
+                borderRadius: "10px",
+              }}
+            >
+              <button
+                onClick={closeModal}
+                className="btn-close"
+                style={{ position: "absolute", top: "10px", right: "10px" }}
+              ></button>
+              <h3 className="text-center mb-4">{modalProduct.name}</h3>
+              <div className="row g-3">
+                {modalProduct.images.split(",").map((image, index) => (
+                  <div className="col-6 col-md-4" key={index}>
+                    <img
+                      src={`/static/img/${image}`}
+                      alt={`${modalProduct.name} ${index + 1}`}
+                      className="img-fluid rounded"
+                      style={{ width: "100%", height: "auto" }}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -54,9 +110,7 @@ console.log("DOM fully loaded");
 const productRoot = document.getElementById("product");
 if (productRoot) {
   console.log("Found #product, rendering React component...");
-  ReactDOM.createRoot(productRoot).render(
-    <Product />
-  );
+  ReactDOM.createRoot(productRoot).render(<Product />);
 } else {
   console.error("No #product div found in the DOM.");
 }
