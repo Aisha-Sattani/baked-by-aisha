@@ -36,10 +36,14 @@ def contact():
     return render_template("contact.html")
 
 # API to get products from MongoDB
-@app.route("/api/products")
+@app.route("/api/products", methods=["GET"])
 def get_products():
-    products = list(products_collection.find({}, {"_id": 0}))  # Exclude MongoDB's ObjectId
+    products = list(products_collection.find({}, {"_id": 1, "name": 1, "price": 1, "images": 1, "category": 1, "size": 1}))
+    # Convert ObjectId to string for JSON compatibility
+    for product in products:
+        product["_id"] = str(product["_id"])
     return jsonify(products)
+
 
 asgi_app = WsgiToAsgi(app)
 
