@@ -26,8 +26,6 @@ const Product = () => {
                     {product.price}
                   </div>
                   <h3 className="mb-3">{product.name}</h3>
-                  <span>Category: {product.category}</span>
-                  <br />
                   <span>Size: {product.size}</span>
                 </div>
                 <div className="position-relative mt-auto">
