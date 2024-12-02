@@ -226,7 +226,7 @@
                   <div className="col-md-6 mb-4" key={product._id}>
                     <div className="card shadow-sm">
                       <img
-                        src={`/static/img/${product.images}.jpg`}
+                        src={`/static/img/${product.images.split(",")[0]}`}
                         className="card-img-top"
                         alt={product.name}
                       />
