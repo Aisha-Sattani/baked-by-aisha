@@ -15,70 +15,57 @@
     />
     <!-- Custom Styles -->
     <link rel="stylesheet" href="/static/css/style.css" />
-        <!-- Custom Styles -->
-        <style>
-            body {
-              background-color: #ffe6f2; /* Light pink background */
-            }
-      
-            .text-primary {
-              color: #d63384 !important; /* Pink primary color */
-            }
-      
-            .btn-primary {
-              background-color: #ff99cc;
-              border-color: #ff99cc;
-            }
-      
-            .btn-primary:hover {
-              background-color: #ff80b3;
-              border-color: #ff80b3;
-            }
-      
-            .btn-warning {
-              background-color: #ffcc99;
-              border-color: #ffcc99;
-            }
-      
-            .btn-warning:hover {
-              background-color: #ffb380;
-              border-color: #ffb380;
-            }
-      
-            .btn-danger {
-              background-color: #ff9999;
-              border-color: #ff9999;
-            }
-      
-            .btn-danger:hover {
-              background-color: #ff6666;
-              border-color: #ff6666;
-            }
-      
-            .card {
-              border: 1px solid #ffccdd;
-              box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            }
-      
-            .card .card-title {
-              color: #d63384;
-            }
-      
-            .form-control,
-            .form-select {
-              border: 1px solid #ffcce0;
-            }
-      
-            .form-control:focus,
-            .form-select:focus {
-              border-color: #ff99cc;
-              box-shadow: 0 0 5px rgba(255, 153, 204);
-            }
-      
-            .container {
-              max-width: 1200px;
-            }
-          </style>
+    <style>
+      body {
+        background-color: #ffe6f2; /* Light pink background */
+      }
+      .text-primary {
+        color: #d63384 !important; /* Pink primary color */
+      }
+      .btn-primary {
+        background-color: #ff99cc;
+        border-color: #ff99cc;
+      }
+      .btn-primary:hover {
+        background-color: #ff80b3;
+        border-color: #ff80b3;
+      }
+      .btn-warning {
+        background-color: #ffcc99;
+        border-color: #ffcc99;
+      }
+      .btn-warning:hover {
+        background-color: #ffb380;
+        border-color: #ffb380;
+      }
+      .btn-danger {
+        background-color: #ff9999;
+        border-color: #ff9999;
+      }
+      .btn-danger:hover {
+        background-color: #ff6666;
+        border-color: #ff6666;
+      }
+      .card {
+        border: 1px solid #ffccdd;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+      .card .card-title {
+        color: #d63384;
+      }
+      .form-control,
+      .form-select {
+        border: 1px solid #ffcce0;
+      }
+      .form-control:focus,
+      .form-select:focus {
+        border-color: #ff99cc;
+        box-shadow: 0 0 5px rgba(255, 153, 204);
+      }
+      .container {
+        max-width: 1200px;
+      }
+    </style>
   </head>
   <body>
     <div class="container my-5">
@@ -97,6 +84,7 @@
           images: "",
           category: "cakes",
           size: "",
+          description: "",
         });
         const [editForm, setEditForm] = React.useState(null);
 
@@ -128,7 +116,7 @@
             .then((response) => response.json())
             .then((data) => {
               setProducts([...products, { ...form, _id: data._id }]);
-              setForm({ name: "", price: "", images: "", category: "cakes", size: "" });
+              setForm({ name: "", price: "", images: "", category: "cakes", size: "", description: "" });
             })
             .catch((error) => console.error("Error adding product:", error));
         };
@@ -186,7 +174,7 @@
                 <input
                   type="text"
                   name="images"
-                  placeholder="Image Filename"
+                  placeholder="Image Filenames (comma-separated)"
                   value={form.images}
                   onChange={handleInputChange}
                   className="form-control"
@@ -214,6 +202,16 @@
                   className="form-control"
                 />
               </div>
+              <div className="mb-3">
+                <textarea
+                  name="description"
+                  placeholder="Description"
+                  value={form.description}
+                  onChange={handleInputChange}
+                  className="form-control"
+                  rows="3"
+                ></textarea>
+              </div>
               <button onClick={addProduct} className="btn btn-primary w-100">
                 Add Product
               </button>
@@ -238,6 +236,8 @@
                           <strong>Category:</strong> {product.category}
                           <br />
                           <strong>Size:</strong> {product.size}
+                          <br />
+                          <strong>Description:</strong> {product.description}
                         </p>
                         <button
                           onClick={() => setEditForm(product)}
@@ -285,7 +285,7 @@
                   <input
                     type="text"
                     name="images"
-                    placeholder="Image Filename"
+                    placeholder="Image Filenames (comma-separated)"
                     value={editForm.images}
                     onChange={handleEditInputChange}
                     className="form-control"
@@ -312,6 +312,16 @@
                     onChange={handleEditInputChange}
                     className="form-control"
                   />
+                </div>
+                <div className="mb-3">
+                  <textarea
+                    name="description"
+                    placeholder="Description"
+                    value={editForm.description}
+                    onChange={handleEditInputChange}
+                    className="form-control"
+                    rows="3"
+                  ></textarea>
                 </div>
                 <button onClick={saveEdit} className="btn btn-success w-100">
                   Save Changes
