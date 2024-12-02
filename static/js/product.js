@@ -84,7 +84,8 @@ const Product = () => {
                 className="btn-close"
                 style={{ position: "absolute", top: "10px", right: "10px" }}
               ></button>
-              <h3 className="text-center mb-4">{modalProduct.name}</h3>
+              <h3 className="text-center mb-2">{modalProduct.name}</h3>
+              <p className="text-center mb-4 text-muted">{modalProduct.description}</p>
               <div className="row g-3">
                 {modalProduct.images.split(",").map((image, index) => (
                   <div className="col-6 col-md-4" key={index}>

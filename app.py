@@ -43,7 +43,11 @@ def manage():
 # API to get all products
 @app.route("/api/products", methods=["GET"])
 def get_products():
-    products = list(products_collection.find({}, {"_id": 1, "name": 1, "price": 1, "images": 1, "category": 1, "size": 1}))
+    products = list(
+        products_collection.find(
+            {}, {"_id": 1, "name": 1, "price": 1, "images": 1, "category": 1, "size": 1, "description": 1}
+        )
+    )
     for product in products:
         product["_id"] = str(product["_id"])  # Convert ObjectId to string
     return jsonify(products)
@@ -57,7 +61,8 @@ def add_product():
         "price": data["price"],
         "images": data["images"],
         "category": data["category"],
-        "size": data["size"]
+        "size": data["size"],
+        "description": data["description"],
     }
     result = products_collection.insert_one(new_product)
     return jsonify({"_id": str(result.inserted_id)}), 201
@@ -79,7 +84,8 @@ def update_product(product_id):
         "price": data.get("price"),
         "images": data.get("images"),
         "category": data.get("category"),
-        "size": data.get("size")
+        "size": data.get("size"),
+        "description": data.get("description"),
     }
     result = products_collection.update_one({"_id": ObjectId(product_id)}, {"$set": update_data})
     if result.matched_count > 0:
