@@ -51,13 +51,14 @@ const Product = () => {
   );
 };
 
-// Mount the React Component
-document.addEventListener("DOMContentLoaded", () => {
-  const productRoot = document.getElementById("product");
-  if (productRoot) {
-    console.log("Found #product, rendering React component...");
-    ReactDOM.createRoot(productRoot).render(<Product />);
-  } else {
-    console.error("No #product div found in the DOM.");
-  }
-});
+console.log("DOM fully loaded");
+
+const productRoot = document.getElementById("product");
+if (productRoot) {
+  console.log("Found #product, rendering React component...");
+  ReactDOM.createRoot(productRoot).render(
+    <Product />
+  );
+} else {
+  console.error("No #product div found in the DOM.");
+}
