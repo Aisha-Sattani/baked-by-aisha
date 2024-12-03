@@ -185,4 +185,13 @@ const Product = () => {
   );
 };
 
-export default Product;
+// Log DOM loading status and render the component
+console.log("DOM fully loaded");
+
+const productRoot = document.getElementById("product");
+if (productRoot) {
+  console.log("Found #product, rendering React component...");
+  ReactDOM.createRoot(productRoot).render(<Product />);
+} else {
+  console.error("No #product div found in the DOM.");
+}
