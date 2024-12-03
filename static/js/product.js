@@ -32,7 +32,7 @@ const Product = () => {
 
         {/* Section for Cakes */}
         <div className="mb-5">
-          <h2 className="text-primary mb-4">Cakes</h2>
+          <h2 className="text-primary text-center mb-4">Cakes</h2>
           <div className="row g-4">
             {filterByCategory("cakes").map((product) => (
               <div className="col-lg-4 col-md-6" key={product._id}>
@@ -67,7 +67,7 @@ const Product = () => {
 
         {/* Section for Cupcakes */}
         <div className="mb-5">
-          <h2 className="text-primary mb-4">Cupcakes</h2>
+          <h2 className="text-primary text-center mb-4">Cupcakes</h2>
           <div className="row g-4">
             {filterByCategory("cupcakes").map((product) => (
               <div className="col-lg-4 col-md-6" key={product._id}>
@@ -102,7 +102,7 @@ const Product = () => {
 
         {/* Section for Cookies */}
         <div className="mb-5">
-          <h2 className="text-primary mb-4">Cookies</h2>
+          <h2 className="text-primary text-center mb-4">Cookies</h2>
           <div className="row g-4">
             {filterByCategory("cookies").map((product) => (
               <div className="col-lg-4 col-md-6" key={product._id}>
