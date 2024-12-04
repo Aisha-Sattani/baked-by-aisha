@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Manage Products</title>
+    <!-- React and Babel -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="/static/css/style.css" />
+    <style>
+      body {
+        background-color: #ffe6f2; /* Light pink background */
+      }
+      .text-primary {
+        color: #d63384 !important; /* Pink primary color */
+      }
+      .btn-primary {
+        background-color: #ff99cc;
+        border-color: #ff99cc;
+      }
+      .btn-primary:hover {
+        background-color: #ff80b3;
+        border-color: #ff80b3;
+      }
+      .btn-warning {
+        background-color: #ffcc99;
+        border-color: #ffcc99;
+      }
+      .btn-warning:hover {
+        background-color: #ffb380;
+        border-color: #ffb380;
+      }
+      .btn-danger {
+        background-color: #ff9999;
+        border-color: #ff9999;
+      }
+      .btn-danger:hover {
+        background-color: #ff6666;
+        border-color: #ff6666;
+      }
+      .card {
+        border: 1px solid #ffccdd;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+      .card .card-title {
+        color: #d63384;
+      }
+      .form-control,
+      .form-select {
+        border: 1px solid #ffcce0;
+      }
+      .form-control:focus,
+      .form-select:focus {
+        border-color: #ff99cc;
+        box-shadow: 0 0 5px rgba(255, 153, 204);
+      }
+      .container {
+        max-width: 1200px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container my-5">
+      <h1 class="text-center text-primary mb-5">Manage Products</h1>
+      <div id="manage-products"></div>
+    </div>
+
+    <!-- React Code -->
+    <!-- {% raw %} -->
+    <script type="text/babel">
+      const ManageProducts = () => {
+        const [products, setProducts] = React.useState([]);
+        const [form, setForm] = React.useState({
+          name: "",
+          price: "",
+          images: "",
+          category: "cakes",
+          size: "",
+          description: "",
+        });
+        const [editForm, setEditForm] = React.useState(null);
+
+        // Fetch products from the API
+        React.useEffect(() => {
+          fetch("/api/products")
+            .then((response) => response.json())
+            .then((data) => setProducts(data))
+            .catch((error) => console.error("Error fetching products:", error));
+        }, []);
+
+        // Handle form input
+        const handleInputChange = (e) => {
+          setForm({ ...form, [e.target.name]: e.target.value });
+        };
+
+        // Handle edit form input
+        const handleEditInputChange = (e) => {
+          setEditForm({ ...editForm, [e.target.name]: e.target.value });
+        };
+
+        // Add a new product
+        const addProduct = () => {
+          fetch("/api/products", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(form),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              setProducts([...products, { ...form, _id: data._id }]);
+              setForm({ name: "", price: "", images: "", category: "cakes", size: "", description: "" });
+            })
+            .catch((error) => console.error("Error adding product:", error));
+        };
+
+        // Delete a product
+        const deleteProduct = (id) => {
+          fetch(`/api/products/${id}`, { method: "DELETE" })
+            .then(() => setProducts(products.filter((product) => product._id !== id)))
+            .catch((error) => console.error("Error deleting product:", error));
+        };
+
+        // Save edited product
+        const saveEdit = () => {
+          fetch(`/api/products/${editForm._id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(editForm),
+          })
+            .then(() => {
+              setProducts(
+                products.map((product) =>
+                  product._id === editForm._id ? editForm : product
+                )
+              );
+              setEditForm(null);
+            })
+            .catch((error) => console.error("Error updating product:", error));
+        };
+
+        return (
+          <div className="row">
+            <div className="col-md-4">
+              <h3 className="text-primary">Add Product</h3>
+              <div className="mb-3">
+                <input
+                  type="text"
+                  name="name"
+                  placeholder="Name"
+                  value={form.name}
+                  onChange={handleInputChange}
+                  className="form-control"
+                />
+              </div>
+              <div className="mb-3">
+                <input
+                  type="text"
+                  name="price"
+                  placeholder="Price"
+                  value={form.price}
+                  onChange={handleInputChange}
+                  className="form-control"
+                />
+              </div>
+              <div className="mb-3">
+                <input
+                  type="text"
+                  name="images"
+                  placeholder="Image Filenames (comma-separated)"
+                  value={form.images}
+                  onChange={handleInputChange}
+                  className="form-control"
+                />
+              </div>
+              <div className="mb-3">
+                <select
+                  name="category"
+                  value={form.category}
+                  onChange={handleInputChange}
+                  className="form-select"
+                >
+                  <option value="cakes">Cakes</option>
+                  <option value="cupcakes">Cupcakes</option>
+                  <option value="cookies">Cookies</option>
+                </select>
+              </div>
+              <div className="mb-3">
+                <input
+                  type="text"
+                  name="size"
+                  placeholder="Size"
+                  value={form.size}
+                  onChange={handleInputChange}
+                  className="form-control"
+                />
+              </div>
+              <div className="mb-3">
+                <textarea
+                  name="description"
+                  placeholder="Description"
+                  value={form.description}
+                  onChange={handleInputChange}
+                  className="form-control"
+                  rows="3"
+                ></textarea>
+              </div>
+              <button onClick={addProduct} className="btn btn-primary w-100">
+                Add Product
+              </button>
+            </div>
+
+            <div className="col-md-8">
+              <h3 className="text-primary">Product List</h3>
+              <div className="row">
+                {products.map((product) => (
+                  <div className="col-md-6 mb-4" key={product._id}>
+                    <div className="card shadow-sm">
+                      <img
+                        src={`/static/img/${product.images.split(",")[0]}`}
+                        className="card-img-top"
+                        alt={product.name}
+                      />
+                      <div className="card-body">
+                        <h5 className="card-title">{product.name}</h5>
+                        <p className="card-text">
+                          <strong>Price:</strong> {product.price}
+                          <br />
+                          <strong>Category:</strong> {product.category}
+                          <br />
+                          <strong>Size:</strong> {product.size}
+                          <br />
+                          <strong>Description:</strong> {product.description}
+                        </p>
+                        <button
+                          onClick={() => setEditForm(product)}
+                          className="btn btn-warning btn-sm me-2"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => deleteProduct(product._id)}
+                          className="btn btn-danger btn-sm"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {editForm && (
+              <div className="col-md-12 mt-4">
+                <h3 className="text-primary">Edit Product</h3>
+                <div className="mb-3">
+                  <input
+                    type="text"
+                    name="name"
+                    placeholder="Name"
+                    value={editForm.name}
+                    onChange={handleEditInputChange}
+                    className="form-control"
+                  />
+                </div>
+                <div className="mb-3">
+                  <input
+                    type="text"
+                    name="price"
+                    placeholder="Price"
+                    value={editForm.price}
+                    onChange={handleEditInputChange}
+                    className="form-control"
+                  />
+                </div>
+                <div className="mb-3">
+                  <input
+                    type="text"
+                    name="images"
+                    placeholder="Image Filenames (comma-separated)"
+                    value={editForm.images}
+                    onChange={handleEditInputChange}
+                    className="form-control"
+                  />
+                </div>
+                <div className="mb-3">
+                  <select
+                    name="category"
+                    value={editForm.category}
+                    onChange={handleEditInputChange}
+                    className="form-select"
+                  >
+                    <option value="cakes">Cakes</option>
+                    <option value="cupcakes">Cupcakes</option>
+                    <option value="cookies">Cookies</option>
+                  </select>
+                </div>
+                <div className="mb-3">
+                  <input
+                    type="text"
+                    name="size"
+                    placeholder="Size"
+                    value={editForm.size}
+                    onChange={handleEditInputChange}
+                    className="form-control"
+                  />
+                </div>
+                <div className="mb-3">
+                  <textarea
+                    name="description"
+                    placeholder="Description"
+                    value={editForm.description}
+                    onChange={handleEditInputChange}
+                    className="form-control"
+                    rows="3"
+                  ></textarea>
+                </div>
+                <button onClick={saveEdit} className="btn btn-success w-100">
+                  Save Changes
+                </button>
+              </div>
+            )}
+          </div>
+        );
+      };
+
+      ReactDOM.createRoot(document.getElementById("manage-products")).render(
+        <ManageProducts />
+      );
+    </script>
+    <!-- {% endraw %} -->
+  </body>
+</html>
