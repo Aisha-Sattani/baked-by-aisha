@@ -92,7 +92,7 @@ def update_product(product_id):
         return jsonify({"message": "Product updated successfully"}), 200
     return jsonify({"message": "Product not found"}), 404
 
-asgi_app = WsgiToAsgi(app)
+app = WsgiToAsgi(app)
 
 if __name__ == "__main__":
     app.run(debug=True)
