@@ -77,9 +77,9 @@ Replace `<username>`, `<password>`, and `<dbname>` with your MongoDB credentials
 ### 5. Run the Application
 Start the Flask development server:
 ```bash
-python app.py
+uvicorn app:app
 ```
-The application will be accessible at `http://127.0.0.1:5000`.
+The application will be accessible at `http://127.0.0.1:8000`.
 
 ## Project Structure
 
@@ -131,7 +131,7 @@ Fetches all products from the MongoDB `products` collection.
 ## Product Management
 
 The **`/manage`** page allows you to manage the products in the database. To access it:
-1. Open your browser and navigate to `http://127.0.0.1:5000/manage`.
+1. Open your browser and navigate to `http://127.0.0.1:8000/manage`.
 2. Use the interface to:
    - Add new products by filling out the form.
    - Edit existing products directly.
