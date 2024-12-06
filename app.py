@@ -1,5 +1,4 @@
 from flask import Flask, jsonify, render_template, request
-from asgiref.wsgi import WsgiToAsgi
 from pymongo import MongoClient
 from bson import ObjectId
 from dotenv import load_dotenv
@@ -92,7 +91,7 @@ def update_product(product_id):
         return jsonify({"message": "Product updated successfully"}), 200
     return jsonify({"message": "Product not found"}), 404
 
-app = WsgiToAsgi(app)
+application = app
 
 if __name__ == "__main__":
     app.run(debug=True)
