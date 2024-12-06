@@ -7,7 +7,7 @@ import os
 # Load environment variables from .env file
 load_dotenv()
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder="../templates")
 
 # MongoDB Configuration
 mongo_uri = os.getenv("MONGODB_URI")
