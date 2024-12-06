@@ -22,3 +22,5 @@ steps:
         '--entry-point',
         'gunicorn -b :$PORT app:app'
       ]
+options:
+  logging: CLOUD_LOGGING_ONLY
