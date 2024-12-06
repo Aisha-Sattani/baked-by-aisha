@@ -1,5 +1,4 @@
 steps:
-  # Install dependencies
   - name: 'python:3.9-slim'
     entrypoint: 'bash'
     args:
@@ -7,22 +6,6 @@ steps:
       - |
         pip install --upgrade pip
         pip install -r requirements.txt
-
-  # Build the container image
-  - name: 'gcr.io/cloud-builders/docker'
-    args:
-      [
-        'build',
-        '-t',
-        'gcr.io/$PROJECT_ID/baked-by-aisha',
-        '.'
-      ]
-
-  # Push the image to Google Container Registry
-  - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'gcr.io/$PROJECT_ID/baked-by-aisha']
-
-  # Deploy to Cloud Run
   - name: 'gcr.io/cloud-builders/gcloud'
     args:
       [
@@ -35,9 +18,7 @@ steps:
         'us-south1',
         '--platform',
         'managed',
-        '--allow-unauthenticated'
+        '--allow-unauthenticated',
+        '--entry-point',
+        'gunicorn -b :$PORT app:app'
       ]
-
-# Specify that the built container is stored in Google Container Registry
-images:
-  - 'gcr.io/$PROJECT_ID/baked-by-aisha'
