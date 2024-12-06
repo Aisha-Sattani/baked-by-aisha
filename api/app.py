@@ -18,11 +18,6 @@ client = MongoClient(mongo_uri)
 db = client["bakedbyaisha"]  # Database
 products_collection = db["products"]  # Collection
 
-# Serve static files explicitly
-@app.route('/static/<path:path>')
-def serve_static(path):
-    return send_from_directory('static', path)
-
 # Serve the static HTML pages
 @app.route("/")
 def home():
