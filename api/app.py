@@ -91,7 +91,8 @@ def update_product(product_id):
         return jsonify({"message": "Product updated successfully"}), 200
     return jsonify({"message": "Product not found"}), 404
 
-application = app
-
+# Ensure the app runs correctly on Cloud Run or locally
 if __name__ == "__main__":
-    app.run(debug=True)
+    # Use the PORT environment variable or default to 8080
+    port = int(os.environ.get("PORT", 8080))
+    app.run(host="0.0.0.0", port=port)
