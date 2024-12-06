@@ -7,7 +7,7 @@ import os
 # Load environment variables from .env file
 load_dotenv()
 
-app = Flask(__name__, template_folder="../templates", static_folder='../static', static_url_path='/static')
+app = Flask(__name__)
 
 # MongoDB Configuration
 mongo_uri = os.getenv("MONGODB_URI")
@@ -17,11 +17,6 @@ if not mongo_uri:
 client = MongoClient(mongo_uri)
 db = client["bakedbyaisha"]  # Database
 products_collection = db["products"]  # Collection
-
-# Serve static files explicitly
-@app.route('/static/<path:path>')
-def serve_static(path):
-    return send_from_directory('static', path)
 
 # Serve the static HTML pages
 @app.route("/")
