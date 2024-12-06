@@ -19,8 +19,10 @@ steps:
         '--platform',
         'managed',
         '--allow-unauthenticated',
-        '--entry-point',
-        "gunicorn -b :$PORT app:app"
+        '--command',
+        'gunicorn',
+        '--args',
+        '-b', '0.0.0.0:8080', 'app:app'
       ]
 options:
   logging: CLOUD_LOGGING_ONLY
