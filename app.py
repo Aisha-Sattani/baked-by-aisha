@@ -1,13 +1,17 @@
-from flask import Flask, jsonify, render_template, request
+from fastapi.staticfiles import StaticFiles
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import HTMLResponse
+from fastapi.middleware.cors import CORSMiddleware
 from pymongo import MongoClient
 from bson import ObjectId
 from dotenv import load_dotenv
 import os
+from pathlib import Path
 
 # Load environment variables from .env file
 load_dotenv()
 
-app = Flask(__name__)
+app = FastAPI()
 
 # MongoDB Configuration
 mongo_uri = os.getenv("MONGODB_URI")
@@ -18,30 +22,42 @@ client = MongoClient(mongo_uri)
 db = client["bakedbyaisha"]  # Database
 products_collection = db["products"]  # Collection
 
+# Allow CORS for frontend requests (optional)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Serve static files
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
 # Serve the static HTML pages
-@app.route("/")
-def home():
-    return render_template("index.html")
+@app.get("/", response_class=HTMLResponse)
+async def home():
+    return Path("templates/index.html").read_text()
 
-@app.route("/products")
-def product():
-    return render_template("product.html")
+@app.get("/products", response_class=HTMLResponse)
+async def products():
+    return Path("templates/product.html").read_text()
 
-@app.route("/about")
-def about():
-    return render_template("about.html")
+@app.get("/about", response_class=HTMLResponse)
+async def about():
+    return Path("templates/about.html").read_text()
 
-@app.route("/contact")
-def contact():
-    return render_template("contact.html")
+@app.get("/contact", response_class=HTMLResponse)
+async def contact():
+    return Path("templates/contact.html").read_text()
 
-@app.route("/manage")
-def manage():
-    return render_template("manage_products.html")
+@app.get("/manage", response_class=HTMLResponse)
+async def manage():
+    return Path("templates/manage_products.html").read_text()
 
 # API to get all products
-@app.route("/api/products", methods=["GET"])
-def get_products():
+@app.get("/api/products")
+async def get_products():
     products = list(
         products_collection.find(
             {}, {"_id": 1, "name": 1, "price": 1, "images": 1, "category": 1, "size": 1, "description": 1}
@@ -49,12 +65,12 @@ def get_products():
     )
     for product in products:
         product["_id"] = str(product["_id"])  # Convert ObjectId to string
-    return jsonify(products)
+    return products
 
 # API to add a new product
-@app.route("/api/products", methods=["POST"])
-def add_product():
-    data = request.json
+@app.post("/api/products", status_code=201)
+async def add_product(request: Request):
+    data = await request.json()
     new_product = {
         "name": data["name"],
         "price": data["price"],
@@ -64,20 +80,20 @@ def add_product():
         "description": data["description"],
     }
     result = products_collection.insert_one(new_product)
-    return jsonify({"_id": str(result.inserted_id)}), 201
+    return {"_id": str(result.inserted_id)}
 
 # API to delete a product
-@app.route("/api/products/<product_id>", methods=["DELETE"])
-def delete_product(product_id):
+@app.delete("/api/products/{product_id}")
+async def delete_product(product_id: str):
     result = products_collection.delete_one({"_id": ObjectId(product_id)})
     if result.deleted_count > 0:
-        return jsonify({"message": "Product deleted successfully"}), 200
-    return jsonify({"message": "Product not found"}), 404
+        return {"message": "Product deleted successfully"}
+    raise HTTPException(status_code=404, detail="Product not found")
 
 # API to update a product
-@app.route("/api/products/<product_id>", methods=["PUT"])
-def update_product(product_id):
-    data = request.json
+@app.put("/api/products/{product_id}")
+async def update_product(product_id: str, request: Request):
+    data = await request.json()
     update_data = {
         "name": data.get("name"),
         "price": data.get("price"),
@@ -88,11 +104,5 @@ def update_product(product_id):
     }
     result = products_collection.update_one({"_id": ObjectId(product_id)}, {"$set": update_data})
     if result.matched_count > 0:
-        return jsonify({"message": "Product updated successfully"}), 200
-    return jsonify({"message": "Product not found"}), 404
-
-# Ensure the app runs correctly on Cloud Run or locally
-if __name__ == "__main__":
-    # Use the PORT environment variable or default to 8080
-    port = int(os.environ.get("PORT", 8080))
-    app.run(host="0.0.0.0", port=port)
+        return {"message": "Product updated successfully"}
+    raise HTTPException(status_code=404, detail="Product not found")

@@ -1,7 +1,5 @@
-Flask==2.3.3
-asgiref==3.7.2
-pymongo==4.6.0
-python-dotenv==1.0.0
-uvicorn==0.23.1
-bson==0.5.10
-gunicorn==21.2.0
+fastapi==0.100.0         # Core FastAPI framework
+uvicorn==0.23.1          # ASGI server for FastAPI
+pymongo==4.6.0           # MongoDB client for database interaction
+python-dotenv==1.0.0     # For environment variable management
+jinja2==3.1.2            # For HTML templating (used indirectly for FastAPI responses)
