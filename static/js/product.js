@@ -26,7 +26,7 @@ const Product = () => {
     <div className="container-xxl bg-light my-6 py-6 pt-0">
       <div className="container">
         <div className="text-center mx-auto mb-5" style={{ maxWidth: "500px" }}>
-          <p className="text-primary text-uppercase mb-2">Bakery Products</p>
+          {/* <p className="text-primary text-uppercase mb-2">Bakery Products</p> */}
           <h1 className="display-6 mb-4">Explore The Categories Of Our Bakery Products</h1>
         </div>
 

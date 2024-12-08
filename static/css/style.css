@@ -415,3 +415,12 @@ h6,
 .copyright a:hover {
     color: var(--light);
 }
+
+#threejs-container {
+    width: 90%;
+    height: 700px;
+    position: relative;
+    margin: 0 auto; /* Centers horizontally */
+    display: block; /* Ensures it's treated as a block element */
+  }
+  

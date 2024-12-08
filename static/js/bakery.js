@@ -6,20 +6,24 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xFFF5F5); // Subtle light pink
 
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-camera.position.set(0, 5, 20);
+const container = document.getElementById('threejs-container');
+const width = container.offsetWidth;
+const height = container.offsetHeight;
+
+const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
+camera.position.set(1, 8, 15);
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
-renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setSize(width, height);
 renderer.shadowMap.enabled = true;
-document.getElementById('threejs-container').appendChild(renderer.domElement);
+container.appendChild(renderer.domElement);
 
 // Controls
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 
 // Lighting
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.8); // Slightly brighter
 scene.add(ambientLight);
 
 const spotLight = new THREE.SpotLight(0xffffff, 5);
@@ -86,6 +90,16 @@ sideWall2.rotation.y = Math.PI / 2;
 sideWall2.position.set(20, 5, 0);
 scene.add(sideWall2);
 
+// Add bakery logo to the back wall
+const logoTexture = new THREE.TextureLoader().load('static/img/BakedbyAisha_logo.png');
+logoTexture.minFilter = THREE.LinearFilter; // Preserve resolution
+logoTexture.magFilter = THREE.LinearFilter;
+const logoMaterial = new THREE.MeshBasicMaterial({ map: logoTexture, transparent: true });
+const logoGeometry = new THREE.PlaneGeometry(12, 6); // Adjusted for proper aspect ratio
+const logo = new THREE.Mesh(logoGeometry, logoMaterial);
+logo.position.set(0, 7, -19.3); // Slightly forward to avoid z-fighting
+scene.add(logo);
+
 // Ceiling
 const ceilingMaterial = new THREE.MeshStandardMaterial({ color: 0xF0E4E4 });
 const ceilingGeometry = new THREE.PlaneGeometry(40, 40);
@@ -105,78 +119,175 @@ scene.add(counter);
 const clickableObjects = [];
 
 // Helper Function to Setup GLTF Models
-// Helper Function to Setup GLTF Models
 function setupModel(model, position, scale, type) {
-    const box = new THREE.Box3().setFromObject(model);
-    const size = new THREE.Vector3();
-    const center = new THREE.Vector3();
-    box.getSize(size);
-    box.getCenter(center);
-  
-    model.position.sub(center); // Center the model
-    model.position.y += size.y / 2; // Place the base at y = 0
-    model.scale.set(scale, scale, scale);
-    model.position.add(position);
-    model.userData.type = type; // Assign type to the root model
-  
-    model.traverse((child) => {
-      if (child.isMesh) {
-        child.userData.type = type; // Propagate type to child meshes
-        clickableObjects.push(child); // Add child meshes to clickable objects
-      }
-    });
-  
-    return model;
-  }
-  
+  const box = new THREE.Box3().setFromObject(model);
+  const size = new THREE.Vector3();
+  const center = new THREE.Vector3();
+  box.getSize(size);
+  box.getCenter(center);
+
+  model.position.sub(center); // Center the model
+  model.position.y += size.y / 2; // Place the base at y = 0
+  model.scale.set(scale, scale, scale);
+  model.position.add(position);
+  model.userData.type = type; // Assign type to the root model
+
+  model.traverse((child) => {
+    if (child.isMesh) {
+      child.userData.type = type; // Propagate type to child meshes
+      clickableObjects.push(child); // Add child meshes to clickable objects
+    }
+  });
+
+  return model;
+}
 
 // Load Bakery Models
 const loader = new GLTFLoader();
 
-loader.load('static/img/candy-covered_cake_draft.glb', (gltf) => {
-  const cake = setupModel(gltf.scene, new THREE.Vector3(-8, 6.5, -5), 2, 'Cake');
-  scene.add(cake);
-});
+function createLabel(text, position) {
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+    canvas.width = 512;
+    canvas.height = 128;
 
-loader.load('static/img/cupcake.glb', (gltf) => {
-  const cupcake = setupModel(gltf.scene, new THREE.Vector3(0, 1.5, -5), 1.5, 'Cupcake');
-  scene.add(cupcake);
-});
+    // Draw bubble background
+    const paddingX = 150; // Adjust horizontal padding to make the bubble narrower
+    context.fillStyle = '#FFFFFF'; // White background
+    context.beginPath();
+    context.roundRect(paddingX / 2, 20, canvas.width - paddingX, canvas.height - 40, 30); // Rounded rectangle
+    context.fill();
 
-loader.load('static/img/cookies_in_the_jar.glb', (gltf) => {
-  const cookie = setupModel(gltf.scene, new THREE.Vector3(8, 1.5, -5), 20, 'Cookie');
-  scene.add(cookie);
-});
+    // Draw border around bubble
+    context.lineWidth = 5;
+    context.strokeStyle = '#FFF5F5'; // Light pink border
+    context.stroke();
+
+    // Draw text
+    context.fillStyle = '#000000'; // Black text
+    context.font = 'Bold 50px Belleza';
+    context.textAlign = 'center';
+    context.textBaseline = 'middle';
+    context.fillText(text, canvas.width / 2, canvas.height / 2);
+
+    // Create texture from canvas
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.minFilter = THREE.LinearFilter;
+    texture.magFilter = THREE.LinearFilter;
+
+    const material = new THREE.SpriteMaterial({ map: texture, transparent: true });
+    const sprite = new THREE.Sprite(material);
+
+    // Adjust size and position
+    sprite.scale.set(8, 2, 1); // Larger and more readable
+    sprite.position.set(position.x, position.y - 1.5, position.z); // Positioned just above the container
+
+    return sprite;
+}
+
+  
+  // Load Bakery Models with Labels
+  loader.load('static/img/candy-covered_cake_draft.glb', (gltf) => {
+    const cake = setupModel(gltf.scene, new THREE.Vector3(-8, 6.5, -5), 2, 'Cake');
+    scene.add(cake);
+  
+    const cakeLabel = createLabel('Cakes', new THREE.Vector3(-8, 2.5, 1));
+    scene.add(cakeLabel);
+  });
+  
+  loader.load('static/img/cupcake.glb', (gltf) => {
+    const cupcake = setupModel(gltf.scene, new THREE.Vector3(0, 2, -5), 0.225, 'Cupcake');
+    scene.add(cupcake);
+  
+    const cupcakeLabel = createLabel('Cupcakes', new THREE.Vector3(0, 2.5, 1));
+    scene.add(cupcakeLabel);
+  });
+  
+  loader.load('static/img/cookies_in_the_jar.glb', (gltf) => {
+    const cookie = setupModel(gltf.scene, new THREE.Vector3(8, 1.5, -5), 20, 'Cookie');
+    scene.add(cookie);
+  
+    const cookieLabel = createLabel('Cookies', new THREE.Vector3(8, 2.5, 1));
+    scene.add(cookieLabel);
+  });
+  
+
+// Add WASD/Arrow Key + Q/E Controls
+const movement = { forward: 0, right: 0, up: 0 };
+
+function onKeyDown(event) {
+  switch (event.key) {
+    case 'w':
+    case 'ArrowUp':
+      movement.forward = 1;
+      break;
+    case 's':
+    case 'ArrowDown':
+      movement.forward = -1;
+      break;
+    case 'a':
+    case 'ArrowLeft':
+      movement.right = -1;
+      break;
+    case 'd':
+    case 'ArrowRight':
+      movement.right = 1;
+      break;
+    case 'e': // Move up
+      movement.up = 1;
+      break;
+    case 'q': // Move down
+      movement.up = -1;
+      break;
+  }
+}
+
+function onKeyUp(event) {
+  switch (event.key) {
+    case 'w':
+    case 'ArrowUp':
+    case 's':
+    case 'ArrowDown':
+      movement.forward = 0;
+      break;
+    case 'a':
+    case 'ArrowLeft':
+    case 'd':
+    case 'ArrowRight':
+      movement.right = 0;
+      break;
+    case 'e': // Stop moving up
+    case 'q': // Stop moving down
+      movement.up = 0;
+      break;
+  }
+}
+
+window.addEventListener('keydown', onKeyDown);
+window.addEventListener('keyup', onKeyUp);
 
 // Raycasting for Clicks and Pointer
 const raycaster = new THREE.Raycaster();
 const pointer = new THREE.Vector2();
 
-// Update pointer coordinates on mouse move
 function onPointerMove(event) {
-  pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
-  pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
+  const rect = container.getBoundingClientRect();
+  pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+  pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
 
-  // Update raycaster for hover detection
   raycaster.setFromCamera(pointer, camera);
   const intersects = raycaster.intersectObjects(clickableObjects, true);
 
-  // Change cursor to pointer if hovering over a clickable object
-  if (intersects.length > 0) {
-    document.body.style.cursor = 'pointer';
-  } else {
-    document.body.style.cursor = 'default';
-  }
+  document.body.style.cursor = intersects.length > 0 ? 'pointer' : 'default';
 }
 
-// Handle click events
 function onClick() {
   raycaster.setFromCamera(pointer, camera);
   const intersects = raycaster.intersectObjects(clickableObjects, true);
 
   if (intersects.length > 0) {
     const clickedObject = intersects[0].object;
-    const type = clickedObject.userData.type || clickedObject.parent?.userData.type;
+    const type = clickedObject.userData.type;
 
     if (type === 'Cake') {
       window.location.href = '/products#:~:text=Our%20Bakery%20Products-,Cakes,-%2465%20%2D%2085';
@@ -185,20 +296,40 @@ function onClick() {
     } else if (type === 'Cookie') {
       window.location.href = '/products#:~:text=Size%3A%2018%20Cupcakes-,Cookies,-Location';
     }
-
-    console.log('Clicked Object Type:', type);
   }
 }
 
-// Add event listeners
-window.addEventListener('mousemove', onPointerMove);
-window.addEventListener('click', onClick);
+container.addEventListener('mousemove', onPointerMove);
+container.addEventListener('click', onClick);
 
 // Animation Loop
 function animate() {
-  controls.update();
-  renderer.render(scene, camera);
-  requestAnimationFrame(animate);
+    controls.update();
+  
+    // Update camera position for movement
+    const direction = new THREE.Vector3();
+    camera.getWorldDirection(direction);
+  
+    const moveForward = direction.clone().multiplyScalar(movement.forward * 0.2);
+    const moveRight = new THREE.Vector3(-direction.z, 0, direction.x).multiplyScalar(movement.right * 0.2);
+    const moveUp = new THREE.Vector3(0, movement.up * 0.2, 0); // Vertical movement
+  
+    camera.position.add(moveForward);
+    camera.position.add(moveRight);
+    camera.position.add(moveUp);
+  
+    renderer.render(scene, camera);
+    requestAnimationFrame(animate);
 }
-
+  
 animate();
+  
+
+// Handle resizing
+window.addEventListener('resize', () => {
+  const width = container.offsetWidth;
+  const height = container.offsetHeight;
+  camera.aspect = width / height;
+  camera.updateProjectionMatrix();
+  renderer.setSize(width, height);
+});
