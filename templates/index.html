@@ -29,6 +29,16 @@
 
     <!-- Template Stylesheet -->
     <link href="../static/css/style.css" rel="stylesheet">
+
+    <script type="importmap">
+        {
+          "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.152.2/examples/jsm/"
+          }
+        }
+      </script>
+
 </head>
 
 <body>
@@ -285,6 +295,9 @@
         </div>
     </div>
     <!-- Product End -->
+        <div id="threejs-container"></div>
+        <script type="module" src="../static/js/bakery.js"></script>
+
 
 
     <!-- Service Start -->
@@ -497,7 +510,6 @@
     </div>
 </div>
 <!-- Testimonial End -->
-
 
 
     <!-- Footer Start -->
